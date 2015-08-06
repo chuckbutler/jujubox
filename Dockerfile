@@ -1,20 +1,28 @@
-FROM ubuntu:14.04
-MAINTAINER Whit Morriss <whit.morriss@canonical.com>
+FROM ubuntu:14.04.2
+MAINTAINER Adam Israel <adam.israel@canonical.com>
+RUN apt-get update && apt-get -y --no-install-recommends install \
+    bzr \
+    ca-certificates \
+    git \
+    golang-go \
+    golang-src \
+    mercurial \
+    make \
+    openssh-client
 
-ADD setup.sh /setup.sh
+ENV HOME=/home/ubuntu
+ENV GOPATH=/home/ubuntu/go
+ENV GOROOT=/usr/lib/go
+ENV JUJU_BRANCH=feature-proc-mgmt
+
+# Setup the user
+ADD setup.sh /
 RUN /setup.sh
 
-RUN mkdir /home/ubuntu/.juju
-RUN mkdir /home/ubuntu/trusty
-RUN mkdir /home/ubuntu/precise
-
+# Make ~.juju persistent
+# This will need a local directory, mapped to via docker run
 VOLUME ["/home/ubuntu/.juju"]
 
-#ADD patchcontainer.sh /patchcontainer.sh
-ADD run.sh /run.sh
-ADD cleanup.sh /cleanup.sh
-ADD charming-setup.sh /charming-setup.sh
+ADD run.sh /
 
-RUN /charming-setup.sh
-RUN /cleanup.sh
 CMD /run.sh
